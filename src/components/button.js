@@ -88,7 +88,7 @@ function getLoadingState(props) {
 }
 
 const BaseButton = props => (
-    <button type={props.type || "button"} {...filterReactDomProps(props)}>
+    <button type={props.type || "button"} {...props}>
         {props.icon}
         {props.children}
     </button>

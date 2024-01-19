@@ -32,11 +32,13 @@ export class GeneratorTrigger extends Component {
     };
 
     render() {
+        debugger;
         return (
             <Generator
                 copyMode={!!this.props.copyMode}
                 onGenerate={this.handleGenerated}
                 isOpen={this.state.isOpen}
+                onOpen={this.handleClick}
                 {...this.props}
             >
                 <View>

@@ -7,6 +7,22 @@ import { ColoredDigits } from "./colored-digits";
 import { colors } from "../variables";
 import { copyToClipboard, selectElementContents } from "../utils";
 
+// NOTE: import for floating-ui migration tentative
+import { Button as BlueprintButton } from "@blueprintjs/core";
+import {
+    useFloating,
+    autoUpdate,
+    offset,
+    flip,
+    shift,
+    useDismiss,
+    useRole,
+    useClick,
+    useInteractions,
+    FloatingFocusManager,
+    useId
+} from "@floating-ui/react";
+
 const NOOP = () => {};
 
 const PopoverStyles = createGlobalStyle`
@@ -287,7 +303,7 @@ export function GeneratorUserInterface(props = {}) {
     );
 }
 
-export const Generator = ({ children, isOpen, className, onClose = NOOP, ...rest }) => {
+export const GeneratorLegacy = ({ children, isOpen, className, onClose = NOOP, ...rest }) => {
     const View = <GeneratorUserInterface {...rest} />;
     return (
         <>
@@ -301,6 +317,43 @@ export const Generator = ({ children, isOpen, className, onClose = NOOP, ...rest
             >
                 {children}
             </Popover>
+        </>
+    );
+};
+
+export const Generator = ({ children, isOpen, onOpen, className, onClose = NOOP, ...rest }) => {
+    const { refs, floatingStyles, context } = useFloating({
+        open: isOpen,
+        onOpenChange: () => onOpen(),
+        middleware: [offset(10), flip({ fallbackAxisSideDirection: "end" }), shift()],
+        whileElementsMounted: autoUpdate
+    });
+
+    const click = useClick(context);
+    const dismiss = useDismiss(context);
+    const role = useRole(context);
+
+    const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
+
+    const headingId = useId();
+
+    const View = <GeneratorUserInterface {...rest} />;
+
+    return (
+        <>
+            <BlueprintButton icon="key" ref={refs.setReference} {...getReferenceProps()} />
+            {isOpen && (
+                <FloatingFocusManager context={context} modal={false}>
+                    <div
+                        ref={refs.setFloating}
+                        style={floatingStyles}
+                        aria-labelledby={headingId}
+                        {...getFloatingProps()}
+                    >
+                        {View}
+                    </div>
+                </FloatingFocusManager>
+            )}
         </>
     );
 };
